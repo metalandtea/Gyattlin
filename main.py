@@ -1,4 +1,10 @@
+from enum import Enum, IntEnum
 
+"""
+Hayden's changes:
+Swapped from constants to Enum for error codes
+Swapped Error class __init__ argument _error_info from optional argument to *args style
+"""
 
 digits = (
     0,1,2,3,4,5,6,7,8,9
@@ -16,9 +22,15 @@ variable_lookup = {}
 
 ##----- ERROR CODES -----##
 
-ERR_WRONG_DATATYPE = 1
-ERR_NOT_FOUND = 2
-ERR_VARIABLE_NOT_DEFINED = 3
+#ERR_WRONG_DATATYPE = 1 # DEPRECIATED VALUES, use Err enum instead
+#ERR_NOT_FOUND = 2
+#ERR_VARIABLE_NOT_DEFINED = 3
+
+# Example: Err.WRONG_DATATYPE instead of ERR_WRONG_DATATYPE
+class Err(Enum):
+    WRONG_DATATYPE = auto()
+    NOT_FOUND = auto()
+    VARIABLE_NOT_DEFINED = auto()
 
 
 ##----- CLASSES -----##
@@ -52,12 +64,12 @@ class Lexer:
 
 class Error:
 
-    def __init__(self,_error_type,_error_info = None):
+    def __init__(self, _error_type, *_error_info):
 
-        if _error_type == ERR_WRONG_DATATYPE:
+        if _error_type == Err.WRONG_DATATYPE:
             print( f"Wrong Datatype. Expected int, got {_error_info[0]}")
 
-        elif _error_type == ERR_NOT_FOUND:
+        elif _error_type == Err.NOT_FOUND:
             print(f"Error finding datatype.")
 
 
@@ -67,7 +79,7 @@ class Error:
 
 class Interpreter:
 
-    def __init__(self,_token_array):
+    def __init__(self, _token_array):
         self.token_array = _token_array
 
     def run(self):
@@ -78,11 +90,11 @@ class Interpreter:
             if token == "MARRIED":
 
                 if token_place + 1 >= len(self.token_array) or token_place - 1 < 0:
-                    Error(ERR_NOT_FOUND)
+                    Error(Err.NOT_FOUND)
 
                 elif type(self.token_array[token_place + 1]) is not int or type(
                     self.token_array[token_place - 1]) is not int:
-                    Error(ERR_WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
+                    Error(Err.WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
 
                 else:
                     self.token_array[token_place + 1] = self.token_array[token_place - 1] * self.token_array[token_place + 1]
@@ -93,10 +105,10 @@ class Interpreter:
             if token == "DIVORCED":
 
                 if token_place + 1 >= len(self.token_array) or token_place - 1 < 0:
-                    Error(ERR_NOT_FOUND)
+                    Error(Err.NOT_FOUND)
 
                 elif type(self.token_array[token_place + 1]) is not int or type(self.token_array[token_place - 1]) is not int:
-                    Error(ERR_WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
+                    Error(Err.WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
 
                 else:
                     self.token_array[token_place + 1] = self.token_array[token_place - 1] // self.token_array[token_place + 1]
@@ -105,10 +117,10 @@ class Interpreter:
             elif token == "LIKED":
 
                 if token_place + 1 >= len(self.token_array) or token_place - 1 < 0:
-                    Error(ERR_NOT_FOUND)
+                    Error(Err.NOT_FOUND)
 
                 elif type(self.token_array[token_place + 1]) is not int or type(self.token_array[token_place - 1]) is not int:
-                    Error(ERR_WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
+                    Error(Err.WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
 
                 else:
                     self.token_array[token_place + 1] = self.token_array[token_place - 1] + self.token_array[token_place + 1]
@@ -117,10 +129,10 @@ class Interpreter:
             elif token == "HATED":
 
                 if token_place + 1 >= len(self.token_array) or token_place - 1 < 0:
-                    Error(ERR_NOT_FOUND)
+                    Error(Err.NOT_FOUND)
 
                 elif type(self.token_array[token_place + 1]) is not int or type(self.token_array[token_place - 1]) is not int:
-                    Error(ERR_WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
+                    Error(Err.WRONG_DATATYPE, [type(self.token_array[token_place + 1])])
 
                 else:
                     self.token_array[token_place + 1] = self.token_array[token_place - 1] - self.token_array[token_place + 1]
@@ -128,7 +140,7 @@ class Interpreter:
 
             elif token == "IS":
                 if token_place + 1 >= len(self.token_array) or token_place - 1 < 0:
-                    Error(ERR_NOT_FOUND)
+                    Error(Err.NOT_FOUND)
                 else:
                     previous_val = self.token_array[token_place - 1]
                     for i, item in enumerate(self.token_array):
