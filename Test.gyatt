@@ -1,7 +1,54 @@
 
-3 MARRIED 5 DIVORCED 5
+-[ 
+write with this for it to be ignored, just make sure to have no other letter touching it, as that's not quite supported yet. I was lazy so the lexer 
+is word based, not character based, this makes it easier to compile words for functions and stuff, but I have found there are some serious restrictions.
+Any ways, just remember that while the amount of whitespace between things doesnt matter, there NEEDS to be whitespace no matter what, in the future, I'll
+probably restructure everything in a way similar to an Assembler, where you simply store certian values in memory and then do syscalls(that system would work the
+best with the current lexer). It also would be suprisingly easy to implement, albeit in a somewhat inefficient way. This would also be better for my learning, as
+I am a little lacking when it comes to stacks.
+]-
 
-i IS 3
-j IS 4
+MANSPLAIN_INLINE A MANSPLAIN B
 
-i MARRIED j
+MANSPLAIN "_______ASSIGNING__________"
+PERSONAL_SPACE
+
+1 IS A
+
+MANSPLAIN "_______MANSPLAINING_NOW__________(SHOULD_REPEAT_FOUR_TIMES)"
+PERSONAL_SPACE
+
+MANSPLAIN A
+
+RUN_IT_DOWN 4
+
+    6 IS B
+
+    A MARRIED B IS A
+
+    MANSPLAIN A
+
+END
+
+
+
+RUN_IT_DOWN 3
+
+    -[ EAT PANT ]-
+    MANSPLAIN_INLINE "IS"
+    MANSPLAIN "BEANS"
+
+END
+
+-[
+    This is a block comment
+    You can write blocks of documentation and stuff
+    There are no inline comments in this language,
+    just block comments
+]-
+
+
+
+
+
+
