@@ -2,6 +2,7 @@
 
 
 import sys
+import tkinter as tk
 
 ## DATATYPES ##
 
@@ -14,38 +15,41 @@ NONE_VAL = "NONE"
 tokens = {
     ### MATH OPERATIONS ###
 
-    "MARRIED", # Multiplication
-    "DIVORCED", # Division
-    "LIKED", # Addition
-    "HATED", # Subtraction
+    "MARRIED",  # Multiplication
+    "DIVORCED",  # Division
+    "LIKED",  # Addition
+    "HATED",  # Subtraction
 
     ### ASSIGNMENT ###
 
-    "IS", # assignment: val -> x
+    "IS",  # assignment: val -> x
 
     ### PRINTING ###
 
-    "MANSPLAIN", # print with a new line after
-    "MANSPLAIN_INLINE", #print without new line after
-    "PERSONAL_SPACE", #newline
-    
+    "MANSPLAIN",  # print with a new line after
+    "MANSPLAIN_INLINE",  # print without new line after
+    "PERSONAL_SPACE",  # newline
+
     ### LOOPING ###
-    
-    "END", # signifies the end of a loop
-    "RUN_IT_DOWN", # Repeat (x) times
+
+    "END",  # signifies the end of a loop
+    "RUN_IT_DOWN",  # Repeat (x) times
 
 }
+
+GLOBAL_RUNNING = False
 
 ## Token Class
 
 class Token:
 
-    def __init__(self,_type,_value = None):
+    def __init__(self, _type, _value=None):
         self.value = _value
         self.type = _type
 
     def __repr__(self):
         return f"{self.type} : {self.value}" if self.value else f"{self.type}"
+
 
 ##----- ERROR CODES -----##
 
@@ -57,13 +61,15 @@ ERR_VARIABLE_NOT_DEFINED = 2
 
 ERR_NOT_VARIABLE = 4
 
+
 ##-----#|  VARIABLE FUNCTIONS |#-----##
 
 def is_var(token):
-    if isinstance(token, Token) and isinstance(token.value,Token):
+    if isinstance(token, Token) and isinstance(token.value, Token):
         return True
 
     return False
+
 
 def get_value(variable):
     if is_var(variable):
@@ -71,35 +77,36 @@ def get_value(variable):
 
     return variable
 
+
 def get_type(variable):
     if is_var(variable):
         return variable.value.type
 
     return variable.type
 
-def set_var(var_1,value):
+
+def set_var(var_1, value):
     if is_var(value):
         var_1.value = value.value
     else:
         var_1.value = value
 
-def check_for_error(error_code,check = None,*check_info):
 
+def check_for_error(error_code, check=None, *check_info):
     # WRONG DATATYPE
     # Checks individual elements and sees if they are the correct datatype
 
     if error_code == ERR_WRONG_DATATYPE:
         for info in check_info:
             if get_type(info) != check:
-                Error(ERR_WRONG_DATATYPE,info.type)
-
+                Error(ERR_WRONG_DATATYPE, info.type)
 
     # NOT FOUND
     # Checks specifically indexes and sees if their out of bound(check)
 
     if error_code == ERR_NOT_FOUND:
         for info in check_info:
-            if info > len(check)-1 or info < 0:
+            if info > len(check) - 1 or info < 0:
                 Error(ERR_NOT_FOUND)
 
     # NOT VARIABLE
@@ -112,28 +119,34 @@ def check_for_error(error_code,check = None,*check_info):
 
     if error_code == ERR_VARIABLE_NOT_DEFINED:
         for info in check_info:
-                if get_value(info).type is DT_NONE:
-                    Error(ERR_VARIABLE_NOT_DEFINED,info.type)
+            if get_value(info).type is DT_NONE:
+                Error(ERR_VARIABLE_NOT_DEFINED, info.type)
+
 
 ## Error Class
 
 class Error:
 
-    def __init__(self,_error_type,_error_info = None):
+    def __init__(self, _error_type, _error_info=None):
 
         if _error_type == ERR_WRONG_DATATYPE:
-            print( f"Error: Wrong Datatype. Expected int, got {_error_info}")
+            print(f"Error: Wrong Datatype. Expected int, got {_error_info}")
+            output_terminal(f"Error: Wrong Datatype. Expected int, got {_error_info}", terminal, True)
 
         elif _error_type == ERR_NOT_FOUND:
             print(f"Error: Not Found.")
+            output_terminal(f"Error: Not Found.", terminal, True)
 
         elif _error_type == ERR_VARIABLE_NOT_DEFINED:
             print(f"Error: Variable -[  {_error_info}  ]- Not Defined")
+            output_terminal(f"Error: Variable -[  {_error_info}  ]- Not Defined",terminal,True)
 
         elif _error_type == ERR_NOT_VARIABLE:
             print(f"Error: Expected Variable")
+            output_terminal(f"Error: Expected Variable", terminal, True)
 
-        sys.exit()
+        global GLOBAL_RUNNING
+        GLOBAL_RUNNING = False
 
 
 ###                     ###
@@ -154,17 +167,16 @@ class Lexer:
         for slot, item in enumerate(self.text_array):
 
             if item in tokens:
-                self.text_array[slot] = Token(item,None)
+                self.text_array[slot] = Token(item, None)
             else:
                 try:
                     self.text_array[slot] = Token(DT_INT, int(item))
                 except (Exception,):
                     if not isinstance(self.text_array[slot], Token):
 
-
                         if '"' in self.text_array[slot]:
-                            self.text_array[slot] = Token(DT_STR,item)
-                            self.text_array[slot].value = item.replace('"','')
+                            self.text_array[slot] = Token(DT_STR, item)
+                            self.text_array[slot].value = item.replace('"', '')
                         else:
                             self.text_array[slot] = Token(item, Token(DT_NONE, NONE_VAL))
 
@@ -179,12 +191,12 @@ class Lexer:
 
         self.text_array = [i for i in self.text_array if i != "NULL"]
 
-
-    def find_other_paren(self,index):
+    def find_other_paren(self, index):
         for j in range(index, len(self.text_array)):
             if self.text_array[j] == ']-':
                 self.text_array[index:j + 1] = ['NULL' for k in range(len(self.text_array)) if k >= index and k <= j]
                 break
+
 
 ###                             ###
 ###         INTERPRETER         ###
@@ -192,7 +204,7 @@ class Lexer:
 
 class Interpreter:
 
-    def __init__(self,_token_array):
+    def __init__(self, _token_array):
         self.token_array = _token_array
         self.loop_amt = 0
         self.loop_start_pos = 0
@@ -200,29 +212,37 @@ class Interpreter:
 
     def run(self):
         ###TOKEN ARRAY###
+
         token_read = self.token_array
 
         place = -1
 
-        while place < len(token_read)-1:
+        while place < len(token_read) - 1:
             place += 1
             token = token_read[place]
 
-            #print(token_read) # Just to do debugging
+            # print(token_read) # Just to do debugging
 
             ## Variables
 
-            prev_place = place -1
+            prev_place = place - 1
             next_place = place + 1
+
+            global GLOBAL_RUNNING
+            print(GLOBAL_RUNNING)
+            if not GLOBAL_RUNNING:
+                print("ENDED")
+                return "ENDED"
+
 
             ## IS token
 
             if token.type == "IS":
 
-                check_for_error(ERR_NOT_FOUND,token_read,prev_place,next_place)
-                check_for_error(ERR_VARIABLE_NOT_DEFINED,None, token_read[prev_place])
-                #check_for_error(ERR_WRONG_DATATYPE,DT_INT, token_read[prev_place])
-                check_for_error(ERR_NOT_VARIABLE,None, token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, prev_place, next_place)
+                check_for_error(ERR_VARIABLE_NOT_DEFINED, None, token_read[prev_place])
+                # check_for_error(ERR_WRONG_DATATYPE,DT_INT, token_read[prev_place])
+                check_for_error(ERR_NOT_VARIABLE, None, token_read[next_place])
 
                 new_var = token_read[prev_place]
                 prev_var = token_read[next_place]
@@ -237,14 +257,17 @@ class Interpreter:
                 check_for_error(ERR_NOT_FOUND, token_read, next_place)
 
                 print(get_value(token_read[next_place]).value)
+                output_terminal(get_value(token_read[next_place]).value, terminal, False)
 
             elif token.type == "MANSPLAIN_INLINE":
                 check_for_error(ERR_NOT_FOUND, token_read, next_place)
 
                 print(get_value(token_read[next_place]).value, end=" ")
+                output_terminal(get_value(token_read[next_place]).value, terminal, True)
 
             elif token.type == "PERSONAL_SPACE":
                 print("\n")
+                output_terminal("", terminal, True)
 
             ##                          ###
             ##      MATH OPERATIONS     ###
@@ -252,45 +275,45 @@ class Interpreter:
 
             ##ADDITION
             elif token.type == "LIKED":
-                check_for_error(ERR_NOT_FOUND,token_read,prev_place,next_place)
-                check_for_error(ERR_WRONG_DATATYPE,DT_INT,token_read[prev_place],token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, prev_place, next_place)
+                check_for_error(ERR_WRONG_DATATYPE, DT_INT, token_read[prev_place], token_read[next_place])
 
                 val_1 = get_value(token_read[next_place])
                 val_2 = get_value(token_read[prev_place])
 
-                set_var(token_read[next_place],Token(DT_INT, int(val_1.value + val_2.value)))
+                set_var(token_read[next_place], Token(DT_INT, int(val_1.value + val_2.value)))
 
             elif token.type == "HATED":
-                check_for_error(ERR_NOT_FOUND,token_read,prev_place,next_place)
-                check_for_error(ERR_WRONG_DATATYPE,DT_INT,token_read[prev_place],token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, prev_place, next_place)
+                check_for_error(ERR_WRONG_DATATYPE, DT_INT, token_read[prev_place], token_read[next_place])
 
                 val_1 = get_value(token_read[next_place])
                 val_2 = get_value(token_read[prev_place])
 
-                set_var(token_read[next_place],Token(DT_INT, int(val_1.value - val_2.value)))
+                set_var(token_read[next_place], Token(DT_INT, int(val_1.value - val_2.value)))
 
             elif token.type == "MARRIED":
-                check_for_error(ERR_NOT_FOUND,token_read,prev_place,next_place)
-                check_for_error(ERR_WRONG_DATATYPE,DT_INT,token_read[prev_place],token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, prev_place, next_place)
+                check_for_error(ERR_WRONG_DATATYPE, DT_INT, token_read[prev_place], token_read[next_place])
 
                 val_1 = get_value(token_read[next_place])
                 val_2 = get_value(token_read[prev_place])
 
-                set_var(token_read[next_place],Token(DT_INT, int(val_1.value * val_2.value)))
+                set_var(token_read[next_place], Token(DT_INT, int(val_1.value * val_2.value)))
 
             elif token.type == "DIVORCED":
-                check_for_error(ERR_NOT_FOUND,token_read,prev_place,next_place)
-                check_for_error(ERR_WRONG_DATATYPE,DT_INT,token_read[prev_place],token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, prev_place, next_place)
+                check_for_error(ERR_WRONG_DATATYPE, DT_INT, token_read[prev_place], token_read[next_place])
 
                 val_1 = get_value(token_read[next_place])
                 val_2 = get_value(token_read[prev_place])
 
-                set_var(token_read[next_place],Token(DT_INT, int(val_1.value // val_2.value)))
+                set_var(token_read[next_place], Token(DT_INT, int(val_1.value // val_2.value)))
 
             elif token.type == "RUN_IT_DOWN":
 
-                check_for_error(ERR_NOT_FOUND,token_read,next_place)
-                check_for_error(ERR_WRONG_DATATYPE,DT_INT,token_read[next_place])
+                check_for_error(ERR_NOT_FOUND, token_read, next_place)
+                check_for_error(ERR_WRONG_DATATYPE, DT_INT, token_read[next_place])
 
                 self.loop_start_pos = place
                 self.loop_amt = get_value(token_read[next_place].value) - 1
@@ -311,19 +334,51 @@ class Interpreter:
 ##################################################################
 ##################################################################
 
+##LEXING, PARSING, AND TOKENIZING IMPORTS!
+def output_terminal(_text, _terminal, has_newline):
+    if has_newline:
+        _text = _terminal.cget("text") + str(_text) + "\n"
+        _terminal.configure(text=_text)
+    else:
+        _text = _terminal.cget("text") + str(_text) + " "
+        _terminal.configure(text=_text)
 
-with open("Test.gyatt") as file:
-    lex_string = file.read()
+def run_program():
+    global GLOBAL_RUNNING
+    GLOBAL_RUNNING = True
 
-lex = Lexer(lex_string)
-print(f"\n Token List is: {lex.parse()} \n")
-print("RUNNING...")
-print("______________________________\n")
+    inp = codebox.get("1.0", 'end-1c')
+    terminal.configure(text="")
+    file = open("Test.gyatt", "w")
+    file.write(inp)
+    file.close()
 
-inter = Interpreter(lex.parse())
+    with open("Test.gyatt") as file:
+        lex_string = file.read()
 
-inter.run()
+    lex = Lexer(lex_string)
+    print(f"\n Token List is: {lex.parse()} \n")
+    print("RUNNING...")
+    print("______________________________\n")
 
-#a = get_type(Token())
+    inter = Interpreter(lex.parse())
+    inter.run()
 
-print()
+root = tk.Tk()
+root.title("Gyattlin IDE")
+root.geometry("1000x600")
+
+codebox = tk.Text(root, width=80, height=30)
+codebox.grid(column=1,row=1)
+
+run_button = tk.Button(text="Run", command=run_program)
+run_button.grid(column=2, row=1)
+
+
+terminal_frame = tk.LabelFrame(width=40, height=20)
+terminal_frame.grid(column=3, row=1)
+
+terminal = tk.Label(terminal_frame, text="Test",width=40, height=20, anchor="nw")
+terminal.grid(column=3, row=1)
+
+root.mainloop()
